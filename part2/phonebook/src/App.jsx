@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios' 
 import Filter from './components/Filter'
 import Persons from './components/Persons'
 import PersonForm from './components/PersonForm'
+import personService from './services/persons'
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
@@ -11,10 +11,10 @@ const App = () => {
   const [filter, setFilter] = useState('')
 
   useEffect(()=>{
-    axios
-    .get("http://localhost:3001/persons")
-    .then(response =>
-      setPersons(response.data)
+    personService
+    .getAll()
+    .then(returnedPerson =>
+      setPersons(returnedPerson)
     )
   }, [])
 
@@ -30,14 +30,39 @@ const App = () => {
     setFilter(event.target.value)
   }
 
+  const handleDelete = (id) =>
+  {
+    if (window.confirm("Delete this phone number ?")) {
+      personService
+      .remove(id)
+      .then(returnedPerson => {
+        setPersons(persons.filter((person) => person.id !== returnedPerson.id))
+      })
+    }
+  }
+
   const handleAdd = (event) => {
     event.preventDefault()
-    if (persons.some(person => person.name === newName))
+    const personObject = {name : newName, phone : newPhone}
+    const similarPerson = persons.find(person => person.name === personObject.name);
+    if (similarPerson)
     {
-      alert(`${newName} is already added to phonebook`)
-      return
+      personService
+      .update(similarPerson.id, personObject)
+      .then(returnedPerson => {
+          setPersons(persons.map((person) => person.id === returnedPerson.id ? returnedPerson : person))
+        }
+      )
     }
-    setPersons([...persons, {name : newName, phone : newPhone}])
+    else
+    {
+      personService
+      .create(personObject)
+      .then(returnedPerson => {
+          setPersons([...persons, returnedPerson])
+        }
+      )
+    }
     setNewName("")
     setNewPhone("")
   }
@@ -51,7 +76,7 @@ const App = () => {
       <h2>Add a new</h2>
         <PersonForm newName={newName} newPhone={newPhone} onNameChange={handleNameChange} onPhoneChange={handlePhoneChange} onAdd={handleAdd}></PersonForm>
       <h2>Numbers</h2>
-      <Persons persons={personsFiltered}></Persons>
+      <Persons persons={personsFiltered} onDelete={handleDelete}></Persons>
     </div>
   )
 }
