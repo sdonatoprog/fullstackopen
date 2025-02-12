@@ -3,12 +3,15 @@ import Filter from './components/Filter'
 import Persons from './components/Persons'
 import PersonForm from './components/PersonForm'
 import personService from './services/persons'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('')
   const [newPhone, setNewPhone] = useState('')
   const [filter, setFilter] = useState('')
+  const [notification, setNotification] = useState(null)
+  const [error, setError] = useState(false)
 
   useEffect(()=>{
     personService
@@ -50,15 +53,32 @@ const App = () => {
       personService
       .update(similarPerson.id, personObject)
       .then(returnedPerson => {
+          setNotification(`Modified ${returnedPerson.name}`)
+          setInterval(() => {
+            setNotification(null)
+          }, 5000)
           setPersons(persons.map((person) => person.id === returnedPerson.id ? returnedPerson : person))
         }
       )
+      .catch(error => {
+        setNotification(`Information of ${personObject.name} has already been removed from server`)
+        setError(true)
+        setInterval(() => {
+          setNotification(null)
+          setError(false)
+        }, 5000)
+        setPersons(persons.filter(person => person.id !== similarPerson.id))
+      })
     }
     else
     {
       personService
       .create(personObject)
       .then(returnedPerson => {
+          setNotification(`Added ${returnedPerson.name}`)
+          setInterval(() => {
+            setNotification(null)
+          }, 5000)
           setPersons([...persons, returnedPerson])
         }
       )
@@ -72,6 +92,7 @@ const App = () => {
   return (
     <div>
       <h2>PhoneBook</h2>
+        <Notification msg={notification} error={error}></Notification>
         <Filter filter={filter} onChange={handleFilterChange}></Filter>
       <h2>Add a new</h2>
         <PersonForm newName={newName} newPhone={newPhone} onNameChange={handleNameChange} onPhoneChange={handlePhoneChange} onAdd={handleAdd}></PersonForm>

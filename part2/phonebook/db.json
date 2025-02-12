@@ -1,24 +1,19 @@
 {
   "persons": [
     {
-      "name": "Arto Hellas",
-      "phone": "1",
-      "id": "1"
+      "id": "e2df",
+      "name": "Sam",
+      "phone": "123"
     },
     {
-      "name": "Dan Abramov",
-      "phone": "123",
-      "id": "3"
+      "id": "8eae",
+      "name": "Eric",
+      "phone": "456"
     },
     {
-      "name": "Mary Poppendieck",
-      "phone": "39-23-6423122",
-      "id": "4"
-    },
-    {
-      "id": "966a",
-      "name": "Artos Hellas",
-      "phone": ""
+      "id": "0176",
+      "name": "Perle",
+      "phone": "345"
     }
   ]
 }
